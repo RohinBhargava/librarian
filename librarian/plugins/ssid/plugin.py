@@ -39,7 +39,7 @@ def exec_command():
             except subprocess.CalledProcessError as err:
                 return dict(error=err.message)
 
-        elif 'Lighthouse' in device:
+        elif 'wt200' in device:
             number = 45
             path = '/mnt/persist'
 
