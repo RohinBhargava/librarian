@@ -27,7 +27,7 @@ def exec_command():
     path = None
     number = 0
 
-    if name != '':
+    if name != '' or reset == 'yes':
         if reset == 'no':
             receiver_name += '-' + name
 
