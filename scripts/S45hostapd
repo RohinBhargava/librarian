@@ -35,7 +35,7 @@ hostapd_start() {
   /bin/echo "bridge=br0" >> $HOSTAPD_CONF
   /bin/echo "driver=nl80211" >> $HOSTAPD_CONF
   /bin/echo "channel=6" >> $HOSTAPD_CONF
-  /bin/echo "ssid="$(cat /mnt/data/.ssid/ssid) >> $HOSTAPD_CONF
+  /bin/echo "ssid="$(cat /mnt/persist/.ssid) >> $HOSTAPD_CONF
 
   /bin/echo -n "Starting hostapd: "
   start-stop-daemon -S -q -p $PID_FILE --exec /usr/sbin/hostapd -- -B -P $PID_FILE $HOSTAPD_CONF
