@@ -138,8 +138,14 @@ def get_content_url(root_url, domain):
         # as multiple matches are possible, pick the first one
         meta = matched_contents[0]
     except IndexError:
-        # invalid content domain
-        path = 'content-not-found'
+        apple_captive = open('/mnt/data/.apple_captive', 'r')
+        other_captive = open('/mnt/data/.other_captive', 'r')
+        if domain in apple_captive.read():
+            path = 'apple-success'
+        elif domain in other_captive.read():
+            path = ''
+        else:
+            path = 'content-not-found'
     else:
         base_path = i18n_url('content:reader', content_id=meta.md5)
         path = '{0}?path={1}'.format(base_path, request.path)
