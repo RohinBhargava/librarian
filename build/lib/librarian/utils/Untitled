@@ -1,0 +1,80 @@
+"""
+captive.py: Traps and redirects captive portals
+
+Copyright 2014-2015, Outernet Inc.
+Some rights reserved.
+
+This software is free software licensed under the terms of GPLv3. See COPYING
+file that comes with the source code, or http://www.gnu.org/licenses/gpl.txt.
+"""
+
+import logging
+
+from datetime import datetime
+from functools import wraps
+from urlparse import urljoin
+
+from bottle import request, redirect, abort
+from bottle_utils.common import unicode
+from bottle_utils.i18n import i18n_url, lazy_gettext as _
+
+from ..core import content as content_mod
+from ..core import downloads
+from ..core import metadata
+from ..core import zipballs
+from ..core.archive import Archive
+from ..core.files import FileManager
+from ..utils.cache import cached
+
+from .lang import SELECT_LANGS
+from .netutils import IPv4Range, get_target_host
+from .system import ensure_dir
+from .template_helpers import template_helper
+
+preparse_apple = list()
+preparse_mcsft = list()
+preparse_other = list()
+
+def get_content_url(root_url, domain):
+    conf = request.app.config
+    archive = Archive.setup(conf['librarian.backend'],
+                            request.db.main,
+                            unpackdir=conf['content.unpackdir'],
+                            contentdir=conf['content.contentdir'],
+                            spooldir=conf['content.spooldir'],
+                            meta_filename=conf['content.metadata'])
+    matched_contents = archive.content_for_domain(domain)
+    try:
+        # as multiple matches are possible, pick the first one
+        meta = matched_contents[0]
+    except IndexError:
+        # invalid content domain
+        path = 'content-not-found'
+    else:
+        base_path = i18n_url('content:reader', content_id=meta.md5)
+        path = '{0}?path={1}'.format(base_path, request.path)
+
+    return urljoin(root_url, path)
+
+def content_resolver_plugin(root_url, ap_client_ip_range):
+    """Load content based on the requested domain"""
+    ip_range = IPv4Range(*ap_client_ip_range)
+
+    def decorator(callback):
+        @wraps(callback)
+        def wrapper(*args, **kwargs):
+            target_host = get_target_host()
+            is_regular_access = target_host in root_url
+            if not is_regular_access and request.remote_addr in ip_range:
+                # a content domain was entered(most likely), try to load it
+                content_url = get_content_url(root_url, target_host)
+                return redirect(content_url)
+            return callback(*args, **kwargs)
+        return wrapper
+    return decorator
+
+def content_domain_plugin(app):
+    app.install(content_resolver_plugin(
+        root_url=app.config['librarian.root_url'],
+        ap_client_ip_range=app.config['librarian.ap_client_ip_range']
+    ))
