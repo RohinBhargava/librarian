@@ -76,6 +76,13 @@ def show_access_denied_page(exc):
     return dict()
 
 
+@view('apple-success')
+def apple_success():
+    return dict()
+
+def mcsft_success():
+    return dict()
+
 def all_404(path):
     abort(404)
 
@@ -101,6 +108,12 @@ def routes(app):
         ('sys:syslog', send_syslog,
          'GET', '/syslog',
          dict(no_i18n=True, unlocked=True, skip=skip_plugins)),
+        ('sys:apple-success', apple-success,
+         'GET', '/apple-success',
+         dict()),
+        ('sys:mcsft-success', mcsft-success,
+         'GET', '/microsoft-success',
+         dict()),
         # This route handler is added because unhandled missing pages cause
         # bottle to _not_ install any plugins, and some are essential to
         # rendering of the 404 page (e.g., i18n, sessions, auth).
