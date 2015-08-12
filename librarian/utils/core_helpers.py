@@ -147,24 +147,6 @@ def get_content_url(root_url, domain):
     return urljoin(root_url, path)
 
 
-def content_resolver_plugin(root_url, ap_client_ip_range):
-    """Load content based on the requested domain"""
-    ip_range = IPv4Range(*ap_client_ip_range)
-
-    def decorator(callback):
-        @wraps(callback)
-        def wrapper(*args, **kwargs):
-            target_host = get_target_host()
-            is_regular_access = target_host in root_url
-            if not is_regular_access and request.remote_addr in ip_range:
-                # a content domain was entered(most likely), try to load it
-                content_url = get_content_url(root_url, target_host)
-                return redirect(content_url)
-            return callback(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
 def create_directories(app):
     ensure_dir(app.config['content.spooldir'])
     ensure_dir(app.config['content.appdir'])
