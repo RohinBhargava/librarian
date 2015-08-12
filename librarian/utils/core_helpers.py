@@ -155,13 +155,6 @@ def create_directories(app):
     ensure_dir(app.config['content.covers'])
 
 
-def content_domain_plugin(app):
-    app.install(content_resolver_plugin(
-        root_url=app.config['librarian.root_url'],
-        ap_client_ip_range=app.config['librarian.ap_client_ip_range']
-    ))
-
-
 @template_helper
 def get_content_path(content_id):
     """ Return relative path of a content based on it's id """

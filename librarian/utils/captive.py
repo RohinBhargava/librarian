@@ -8,12 +8,14 @@ This software is free software licensed under the terms of GPLv3. See COPYING
 file that comes with the source code, or http://www.gnu.org/licenses/gpl.txt.
 """
 
-import logging
+import logging, sys
 
 from functools import wraps
 from urlparse import urljoin
 
 from bottle import request, redirect, abort
+
+from core_helpers import get_content_url
 
 from .netutils import IPv4Range, get_target_host
 
@@ -25,7 +27,7 @@ def check_captive_portal(root_url, domain, apple, mcsft, other):
     elif domain in other:
         path = ''
     else:
-        pass
+        return get_content_url(root_url, domain)
     return urljoin(root_url, path)
 
 def captive_resolver_plugin(root_url, ap_client_ip_range, apple, mcsft, other):
