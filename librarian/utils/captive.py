@@ -22,6 +22,7 @@ mcsft = None
 other = None
 
 def setup_portals(app):
+    conf = request.app.config
     apple = app.config(conf['librarian.apple_captive_domains']).splitlines()
     mcsft = app.config(conf['librarian.mcsft_captive_domains']).splitlines()
     other = app.config(conf['librarian.other_captive_domains']).splitlines()
