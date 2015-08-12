@@ -80,6 +80,7 @@ def show_access_denied_page(exc):
 def apple_success():
     return dict()
 
+@view('mcsft-success')
 def mcsft_success():
     return dict()
 
@@ -108,10 +109,10 @@ def routes(app):
         ('sys:syslog', send_syslog,
          'GET', '/syslog',
          dict(no_i18n=True, unlocked=True, skip=skip_plugins)),
-        ('sys:apple-success', apple-success,
+        ('sys:apple-success', apple_success,
          'GET', '/apple-success',
          dict()),
-        ('sys:mcsft-success', mcsft-success,
+        ('sys:mcsft-success', mcsft_success,
          'GET', '/microsoft-success',
          dict()),
         # This route handler is added because unhandled missing pages cause
