@@ -17,17 +17,7 @@ from bottle import request, redirect, abort
 
 from .netutils import IPv4Range, get_target_host
 
-apple = None
-mcsft = None
-other = None
-
-def setup_portals(app):
-    conf = request.app.config
-    apple = app.config(conf['librarian.apple_captive_domains']).splitlines()
-    mcsft = app.config(conf['librarian.mcsft_captive_domains']).splitlines()
-    other = app.config(conf['librarian.other_captive_domains']).splitlines()
-
-def check_captive_portal(root_url, domain):
+def check_captive_portal(root_url, domain, apple, mcsft, other):
     if domain in apple:
         path = 'apple-success'
     elif domain in mcsft:
@@ -38,7 +28,7 @@ def check_captive_portal(root_url, domain):
         pass
     return urljoin(root_url, path)
 
-def captive_resolver_plugin(root_url, ap_client_ip_range):
+def captive_resolver_plugin(root_url, ap_client_ip_range, apple, mcsft, other):
     """Load content based on the requested domain"""
     ip_range = IPv4Range(*ap_client_ip_range)
 
@@ -48,14 +38,17 @@ def captive_resolver_plugin(root_url, ap_client_ip_range):
             target_host = get_target_host()
             is_regular_access = target_host in root_url
             if not is_regular_access and request.remote_addr in ip_range:
-                captive_url = check_captive_portal(root_url, target_host)
+                captive_url = check_captive_portal(root_url, target_host, apple, mcsft, other)
                 return redirect(captive_url)
             return callback(*args, **kwargs)
         return wrapper
     return decorator
 
 def captive_domain_plugin(app):
-    app.install(content_resolver_plugin(
+    app.install(captive_resolver_plugin(
         root_url=app.config['librarian.root_url'],
-        ap_client_ip_range=app.config['librarian.ap_client_ip_range']
+        ap_client_ip_range=app.config['librarian.ap_client_ip_range'],
+        apple = app.config['librarian.apple_captive_domains'].splitlines(),
+        mcsft = app.config['librarian.mcsft_captive_domains'].splitlines(),
+        other = app.config['librarian.other_captive_domains'].splitlines()
     ))
