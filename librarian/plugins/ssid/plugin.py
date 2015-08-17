@@ -34,20 +34,14 @@ def exec_command():
         if 'ORxPi' in device:
             number = 81
             path = '/opt/orx'
-            try:
-                subprocess.call('sed -i \'3s/ssid=.*/ssid=%s/g\' %s/hostapd.conf'%(receiver_name, path), shell=True)
-            except subprocess.CalledProcessError as err:
-                return dict(error=err.message)
+            subprocess.call('sed -i \'3s/ssid=.*/ssid=%s/g\' %s/hostapd.conf'%(receiver_name, path), shell=True)
 
         elif 'wt200' in device:
             number = 45
             path = '/mnt/persist'
 
         if path != None and number != 0:
-            try:
-                subprocess.call('echo %s > %s/.ssid; /etc/init.d/S%dhostapd restart'%(receiver_name, path, number), shell=True)
-            except subprocess.CalledProcessError as err:
-                return dict(error=err.message)
+            subprocess.call('echo %s > %s/.ssid; /etc/init.d/S%dhostapd restart'%(receiver_name, path, number), shell=True)
             return dict(name=receiver_name)
 
         else:
@@ -56,7 +50,14 @@ def exec_command():
     else:
         return dict(error='You have not given a new name. Please try again!')
 
+
 def install(app, route):
+    try:
+        device = open('/etc/platform').read()
+    except (OSError, IOError):
+        raise NotSupportedError('SSID not supported on this platform')
+    if 'ORxPi' not in device or 'wt200' not in device:
+        raise NotSupportedError('SSID not supported on this platform')
     route(('changed', exec_command, 'GET', '', {}))
 
 
