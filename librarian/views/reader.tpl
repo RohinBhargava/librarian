@@ -8,7 +8,7 @@ ${meta.title}
 
 <%block name="main">
 <div class="reader">
-    <div class="reader-frame">
+    <div class="reader-frame" style="overflow:auto;-webkit-overflow-scrolling:touch">
         <iframe id="reader-main" class="reader-main" src="${url('content:file', content_path=th.get_content_path(meta.md5), filename=file_path)}" data-keep-formatting="${meta.keep_formatting}"></iframe>
     </div>
     <div class="reader-meta data">
