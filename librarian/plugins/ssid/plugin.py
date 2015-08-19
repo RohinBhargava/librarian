@@ -11,12 +11,15 @@ file that comes with the source code, or http://www.gnu.org/licenses/gpl.txt.
 """
 
 from bottle import request
-from bottle_utils.i18n import lazy_gettext as _, i18n_url
+from bottle_utils.i18n import lazy_gettext as _
 
 from ..dashboard import DashboardPlugin
 from ...utils.template import view
 
+from ..exceptions import NotSupportedError
+
 import subprocess
+
 
 @view('ssid/changed_results', error=None, name=None)
 def exec_command():
@@ -40,7 +43,7 @@ def exec_command():
             number = 45
             path = '/mnt/persist'
 
-        if path != None and number != 0:
+        if path is not None and number != 0:
             subprocess.call('echo %s > %s/.ssid; /etc/init.d/S%dhostapd restart'%(receiver_name, path, number), shell=True)
             return dict(name=receiver_name)
 
