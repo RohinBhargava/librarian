@@ -7,8 +7,9 @@ $reader-data-height: 60px;
   left: 0;
   right: 0;
   background: $white;
-  overflow: hidden;
-
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  
   iframe {
     display: block;
     width: 100%;
